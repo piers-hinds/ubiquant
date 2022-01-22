@@ -22,4 +22,4 @@ class Mlp(nn.Module):
         )
 
     def forward(self, x):
-        return self.layers(x)
+        return self.layers(x).squeeze(-1)

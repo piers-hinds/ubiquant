@@ -10,11 +10,9 @@ def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006):
     for epoch in range(epochs):
         running_loss = 0
         for x, y in dl:
-            x = x.squeeze(0)
-            y = y.squeeze(0)
             opt.zero_grad()
             preds = model(x)
-            loss = loss_fn(preds.squeeze(-1), y)
+            loss = loss_fn(preds, y)
             loss.backward()
             opt.step()
             running_loss += loss.item()
@@ -36,11 +34,9 @@ def validate_model(model, dl, metrics):
     with torch.inference_mode():
         running_loss = np.zeros(shape=len(metrics))
         for x, y in dl:
-            x = x.squeeze(0);
-            y = y.squeeze(0)
             preds = model(x)
             for i, metric in enumerate(metrics):
-                loss = metric(preds.squeeze(-1), y)
+                loss = metric(preds, y)
                 running_loss[i] += loss.item()
     return running_loss / len(dl)
 
