@@ -1,11 +1,13 @@
 import torch
+from torch.optim.lr_scheduler import ExponentialLR
 import numpy as np
 from .data import get_ubiquant_dataloaders
 
 
-def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006):
+def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006, gamma=0.9):
     model.train()
     opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=0.001)
+    scheduler = ExponentialLR(opt, gamma=gamma)
     losses = []
     for epoch in range(epochs):
         running_loss = 0
@@ -17,6 +19,7 @@ def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006):
             opt.step()
             running_loss += loss.item()
         losses.append(running_loss / len(dl))
+        scheduler.step()
 
         if vdl is not None:
             val_losses = validate_model(model, vdl, metrics)
