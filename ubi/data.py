@@ -26,4 +26,5 @@ class UbiquantDataset(Dataset):
 def get_ubiquant_dataloaders(dir, fnames, train_index, val_index, device='cuda'):
     train_dset = UbiquantDataset(dir, fnames.iloc[train_index], device)
     val_dset = UbiquantDataset(dir, fnames.iloc[val_index], device)
-    return DataLoader(train_dset), DataLoader(val_dset)
+    return (DataLoader(train_dset, batch_size=None, batch_sampler=None),
+            DataLoader(val_dset, batch_size=None, batch_sampler=None))
