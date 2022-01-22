@@ -1,5 +1,6 @@
 import torch
 import numpy as np
+from .data import get_ubiquant_dataloaders
 
 
 def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006):
