@@ -19,6 +19,7 @@ class Scaler(nn.Module):
         self = super().to(*args, **kwargs)
         self.mins = self.mins.to(*args, **kwargs)
         self.maxs = self.maxs.to(*args, **kwargs)
+        self.ranges = self.ranges.to(*args, **kwargs)
         return self
 
 
