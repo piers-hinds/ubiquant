@@ -1,6 +1,20 @@
 import torch.nn as nn
 
 
+class Scaler(nn.Module):
+    """Min-max scaler"""
+    def __init__(self, mins, maxs):
+        super(Scaler, self).__init__()
+        self.mins = mins
+        self.maxs = maxs
+        self.ranges = self.maxs - self.mins
+
+    def forward(self, x):
+        x_std = (x - self.mins) / self.ranges
+        x_scaled = x_std * 2 - 1
+        return x_scaled
+
+
 class Mlp(nn.Module):
     def __init__(self):
         super().__init__()
