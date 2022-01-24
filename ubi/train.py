@@ -4,10 +4,10 @@ import numpy as np
 from .data import get_ubiquant_dataloaders
 
 
-def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006, gamma=0.9):
+def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006):
     model.train()
-    opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=0.001)
-    scheduler = ExponentialLR(opt, gamma=gamma)
+    opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=0.0001)
+    #scheduler = ExponentialLR(opt, gamma=gamma)
     losses = []
     for epoch in range(epochs):
         running_loss = 0
@@ -19,21 +19,22 @@ def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006, gam
             opt.step()
             running_loss += loss.item()
         losses.append(running_loss / len(dl))
-        scheduler.step()
+        #scheduler.step()
 
         if vdl is not None:
-            val_losses = validate_model(model, vdl, metrics)
+            val_losses, _ = validate_model(model, vdl, metrics)
             model.train()
             print('Epoch: ', epoch, '    Train loss: ', round(running_loss / len(dl), 6),
                   '    Val loss: ', *[round(v, 6) for v in val_losses])
         else:
             print('Epoch: ', epoch, '    Train loss: ', round(running_loss / len(dl), 6))
 
-    return losses
+    return 
 
 
-def validate_model(model, dl, metrics):
+def validate_model(model, dl, metrics, save_preds=False):
     model.eval()
+    dfs = []
     with torch.inference_mode():
         running_loss = np.zeros(shape=len(metrics))
         for x, y in dl:
@@ -41,24 +42,33 @@ def validate_model(model, dl, metrics):
             for i, metric in enumerate(metrics):
                 loss = metric(preds, y)
                 running_loss[i] += loss.item()
-    return running_loss / len(dl)
+            if save_preds:
+                dfs.append(pd.DataFrame({'pred':preds.cpu().numpy()}))
+    if save_preds:
+        all_preds = pd.concat(dfs)
+        return running_loss / len(dl), all_preds
+    else:
+        return running_loss / len(dl), None
 
-
-def cv(Model, criterion, metric, splitter, dir, file_names, epochs, device='cuda'):
+def cv(Model, criterion, metric, splitter, dir, file_names, epochs, device='cuda', save_preds=False):
     scores = []
     weights = []
     models = []
+    dfs = []
 
     for train_index, val_index in splitter.split(file_names):
         model = Model().to(device)
         train_dl, val_dl = get_ubiquant_dataloaders(dir, file_names, train_index, val_index, device)
         _ = train_model(model, train_dl, criterion, epochs)
-        fold_score = validate_model(model, val_dl, [metric])[0]
-        scores.append(fold_score)
+        fold_score, preds = validate_model(model, val_dl, [metric], save_preds=save_preds)
+        dfs.append(preds)
+        scores.append(fold_score[0])
         weights.append(len(train_index))
-        print('Fold score: ', round(fold_score, 6))
+        print('Fold score: ', round(fold_score[0], 6))
         models.append(model)
     weights = np.array(weights)
     weights = weights / weights.sum()
+    if save_preds:
+        all_preds = pd.concat(dfs)
 
-    return np.array(scores), weights, models
+    return np.array(scores), weights, models, all_preds
