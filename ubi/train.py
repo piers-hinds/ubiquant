@@ -53,7 +53,7 @@ def validate_model(model, dl, metrics, save_preds=False):
         return running_loss / len(dl), None
 
     
-def cv(module, criterion, metric, splitter, dir, file_names, epochs, device='cuda', save_preds=True, train_final=True):
+def cv(module, criterion, metric, splitter, dir, file_names, epochs, invest_id=False, device='cuda', save_preds=True, train_final=True):
     scores = []
     weights = []
     models = []
@@ -61,7 +61,7 @@ def cv(module, criterion, metric, splitter, dir, file_names, epochs, device='cud
 
     for train_index, val_index in splitter.split(file_names):
         model = module().to(device)
-        train_dl, val_dl = get_ubiquant_dataloaders(dir, file_names, train_index, val_index, device)
+        train_dl, val_dl = get_ubiquant_dataloaders(dir, file_names, train_index, val_index, device, invest_id=invest_id)
         _ = train_model(model, train_dl, criterion, epochs)
         fold_score, preds = validate_model(model, val_dl, [metric], save_preds=save_preds)
         dfs.append(preds)
@@ -79,7 +79,7 @@ def cv(module, criterion, metric, splitter, dir, file_names, epochs, device='cud
     if train_final:
         print('Training final model...')
         final_model = module().to(device)
-        train_dl, _ = get_ubiquant_dataloaders(dir, file_names, list(range(len(file_names))), [], device)
+        train_dl, _ = get_ubiquant_dataloaders(dir, file_names, list(range(len(file_names))), [], device, invest_id=invest_id)
         _ = train_model(final_model, train_dl, criterion, epochs)
     else:
         final_model = None
