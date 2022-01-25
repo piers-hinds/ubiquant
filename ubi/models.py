@@ -48,11 +48,11 @@ class Mlp(nn.Module):
     
 
 class Dcnn(nn.Module):
-    def __init__(self):
+    def __init__(self, n_ids):
         super().__init__()
 
         self.embed_ids = nn.Sequential(
-            nn.Embedding(3774, 32),
+            nn.Embedding(n_ids, 32),
             nn.Linear(32, 64),
             nn.BatchNorm1d(64),
             nn.SiLU(),
