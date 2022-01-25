@@ -1,6 +1,8 @@
 import torch
 from torch.optim.lr_scheduler import ExponentialLR
 import numpy as np
+import os
+import pandas as pd
 from .data import get_ubiquant_dataloaders
 
 
@@ -50,6 +52,7 @@ def validate_model(model, dl, metrics, save_preds=False):
     else:
         return running_loss / len(dl), None
 
+    
 def cv(Model, criterion, metric, splitter, dir, file_names, epochs, device='cuda', save_preds=False):
     scores = []
     weights = []
@@ -72,3 +75,28 @@ def cv(Model, criterion, metric, splitter, dir, file_names, epochs, device='cuda
         all_preds = pd.concat(dfs)
 
     return np.array(scores), weights, models, all_preds
+
+
+def save_models(models, model_path):
+    for i, model in enumerate(models):
+        torch.save(model.state_dict(), os.path.join(model_path, 'fold_'+str(i)+'.pkl'))
+
+        
+def save_scores(score, weights, model_path):
+    pd.DataFrame({'weight': weights, 'score': score}).to_csv(os.path.join(model_path, 'fold_scores.csv'), index=False)
+    pd.DataFrame({'score': [(score * weights).sum()]}).to_csv(os.path.join(model_path, 'score.csv'), index=False)
+
+    
+def save_preds(preds, model_path):
+    preds.to_csv(os.path.join(model_path, 'preds.csv'), index=False)
+
+    
+def save_cv_info(model_path, cv_output):
+    """Saves score, weights, models and OOF preds from CV"""
+    if not os.path.exists(model_path):
+        os.makedirs(model_path)
+    score, weights, models, preds = cv_output
+    save_models(models, model_path)
+    save_scores(score, weights, model_path)
+    save_preds(preds, model_path)
+    return 0
