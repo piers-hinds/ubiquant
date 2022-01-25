@@ -77,6 +77,7 @@ def cv(module, criterion, metric, splitter, dir, file_names, epochs, device='cud
         all_preds = pd.concat(dfs)
 
     if train_final:
+        print('Training final model...')
         final_model = module().to(device)
         train_dl, _ = get_ubiquant_dataloaders(dir, file_names, list(range(len(file_names))), [], device)
         _ = train_model(final_model, train_dl, criterion, epochs)
