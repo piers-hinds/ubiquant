@@ -53,14 +53,14 @@ def validate_model(model, dl, metrics, save_preds=False):
         return running_loss / len(dl), None
 
     
-def cv(Model, criterion, metric, splitter, dir, file_names, epochs, device='cuda', save_preds=False):
+def cv(module, criterion, metric, splitter, dir, file_names, epochs, device='cuda', save_preds=True, train_final=True):
     scores = []
     weights = []
     models = []
     dfs = []
 
     for train_index, val_index in splitter.split(file_names):
-        model = Model().to(device)
+        model = module().to(device)
         train_dl, val_dl = get_ubiquant_dataloaders(dir, file_names, train_index, val_index, device)
         _ = train_model(model, train_dl, criterion, epochs)
         fold_score, preds = validate_model(model, val_dl, [metric], save_preds=save_preds)
@@ -69,12 +69,21 @@ def cv(Model, criterion, metric, splitter, dir, file_names, epochs, device='cuda
         weights.append(len(train_index))
         print('Fold score: ', round(fold_score[0], 6))
         models.append(model)
+
     weights = np.array(weights)
     weights = weights / weights.sum()
+
     if save_preds:
         all_preds = pd.concat(dfs)
 
-    return np.array(scores), weights, models, all_preds
+    if train_final:
+        final_model = module().to(device)
+        train_dl, _ = get_ubiquant_dataloaders(dir, file_names, list(range(len(file_names))), [], device)
+        _ = train_model(final_model, train_dl, criterion, epochs)
+    else:
+        final_model = None
+
+    return np.array(scores), weights, models, all_preds, final_model
 
 
 def save_models(models, model_path):
@@ -95,8 +104,13 @@ def save_cv_info(model_path, cv_output):
     """Saves score, weights, models and OOF preds from CV"""
     if not os.path.exists(model_path):
         os.makedirs(model_path)
-    score, weights, models, preds = cv_output
+
+    score, weights, models, preds, final_model = cv_output
     save_models(models, model_path)
     save_scores(score, weights, model_path)
     save_preds(preds, model_path)
+
+    if final_model is not None:
+         torch.save(final_model.state_dict(), os.path.join(model_path, 'final_model.pkl'))
+
     return 0
