@@ -52,7 +52,7 @@ class Dcnn(nn.Module):
         super().__init__()
 
         self.embed_ids = nn.Sequential(
-            nn.Embedding(3773, 32),
+            nn.Embedding(3774, 32),
             nn.Linear(32, 64),
             nn.BatchNorm1d(64),
             nn.SiLU(),
