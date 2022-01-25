@@ -7,10 +7,13 @@ from sklearn.preprocessing import MinMaxScaler
 
 
 class UbiquantDataset(Dataset):
-    def __init__(self, dir, fnames, device='cuda'):
+    def __init__(self, dir, fnames, device='cuda', invest_id=False):
         self.dir = dir
         self.fnames = fnames
         self.features = ['f_' + str(i) for i in range(300)]
+        self.invest_id = invest_id
+        if self.invest_id:
+            self.features = ['investment_id'] + self.features
         self.target = 'target'
         self.device = device
 
@@ -24,10 +27,10 @@ class UbiquantDataset(Dataset):
                 torch.tensor(data[self.target].to_numpy(), device=self.device))
 
 
-def get_ubiquant_dataloaders(dir, fnames, train_index, val_index, device='cuda', min_max=None):
-    train_dset = UbiquantDataset(dir, fnames.iloc[train_index], device)
-    val_dset = UbiquantDataset(dir, fnames.iloc[val_index], device)
-    if min_max is not None:
+def get_ubiquant_dataloaders(dir, fnames, train_index, val_index, device='cuda', min_max=False, invest_id=False):
+    train_dset = UbiquantDataset(dir, fnames.iloc[train_index], device, invest_id)
+    val_dset = UbiquantDataset(dir, fnames.iloc[val_index], device, invest_id)
+    if min_max:
         return (DataLoader(train_dset, batch_size=None, batch_sampler=None),
                 DataLoader(val_dset, batch_size=None, batch_sampler=None),
                 get_min_max(dir, fnames.iloc[train_index]))
