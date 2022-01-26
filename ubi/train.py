@@ -31,7 +31,7 @@ def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006):
         else:
             print('Epoch: ', epoch, '    Train loss: ', round(running_loss / len(dl), 6))
 
-    return 
+    return losses
 
 
 def validate_model(model, dl, metrics, save_preds=False):
