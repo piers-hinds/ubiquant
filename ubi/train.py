@@ -53,7 +53,8 @@ def validate_model(model, dl, metrics, save_preds=False):
         return running_loss / len(dl), None
 
     
-def cv(module, criterion, metric, splitter, dir, file_names, epochs, invest_id=False, device='cuda', save_preds=True, train_final=True):
+def cv(module, criterion, metric, splitter, dir, file_names, epochs, invest_id=False, device='cuda', save_preds=True,
+       train_final=True, custom_weights=np.array([0.125, 0.125, 0.25, 0.5])):
     scores = []
     weights = []
     models = []
@@ -72,6 +73,8 @@ def cv(module, criterion, metric, splitter, dir, file_names, epochs, invest_id=F
 
     weights = np.array(weights)
     weights = weights / weights.sum()
+    if custom_weights is not None:
+        weights = custom_weights
 
     if save_preds:
         all_preds = pd.concat(dfs)
