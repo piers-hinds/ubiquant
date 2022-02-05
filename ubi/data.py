@@ -4,6 +4,7 @@ import pandas as pd
 import numpy as np
 import os
 from sklearn.preprocessing import MinMaxScaler
+from sklearn.model_selection._split import _BaseKFold
 
 
 class UbiquantDataset(Dataset):
@@ -45,3 +46,23 @@ def get_min_max(dir, fnames):
     scaler = MinMaxScaler(feature_range=(-1, 1))
     scaler.fit(df[['f_' + str(i) for i in range(300)]])
     return scaler.data_min_, scaler.data_max_
+
+
+class UbiquantCustomSplits(_BaseKFold):
+    """Maps the time_id index splits to row index splits - HARD CODED
+    
+    Corresponds to TimeSeriesSplit with test_size=140 and gap=50 (in terms of time_id indices)
+    """
+    def __init__(self):
+        super().__init__(4, shuffle=False, random_state=None)
+        self.train_inds = [list(range(1302056+1)),
+                          list(range(1667379+1)), 
+                          list(range(2065451+1)), 
+                          list(range(2497081+1))]
+        self.val_inds = [list(range(1428936, 1806634+1)), 
+                        list(range(1806635, 2217323+1)), 
+                        list(range(2217324, 2653554+1)), 
+                        list(range(2653555, 3110509))]
+    def split(self, X, y=None, groups=None):
+        for train_inds, val_inds in zip(self.train_inds, self.val_inds):
+            yield train_inds, val_inds 
