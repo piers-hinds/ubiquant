@@ -62,7 +62,7 @@ class UbiquantCustomSplits(_BaseKFold):
         self.val_inds = [list(range(1428936, 1806634+1)), 
                         list(range(1806635, 2217323+1)), 
                         list(range(2217324, 2653554+1)), 
-                        list(range(2653555, 3110509))]
+                        list(range(2653555, 3110509+1))]
     def split(self, X, y=None, groups=None):
         for train_inds, val_inds in zip(self.train_inds, self.val_inds):
             yield train_inds, val_inds 
