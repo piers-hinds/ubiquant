@@ -55,14 +55,15 @@ class UbiquantCustomSplits(_BaseKFold):
     """
     def __init__(self):
         super().__init__(4, shuffle=False, random_state=None)
-        self.train_inds = [list(range(1302056+1)),
-                          list(range(1667379+1)), 
-                          list(range(2065451+1)), 
-                          list(range(2497081+1))]
-        self.val_inds = [list(range(1428936, 1806634+1)), 
-                        list(range(1806635, 2217323+1)), 
-                        list(range(2217324, 2653554+1)), 
-                        list(range(2653555, 3110509+1))]
+        self.train_inds = [list(range(1324371+1)),
+                          list(range(1691945+1)),
+                          list(range(2092352+1)),
+                          list(range(2525213+1))]
+        self.val_inds = [list(range(1452376, 1831830+1)),
+                        list(range(1831831, 2245371+1)),
+                        list(range(2245372, 2681901+1)),
+                        list(range(2681902, 3141409+1))]
+
     def split(self, X, y=None, groups=None):
         for train_inds, val_inds in zip(self.train_inds, self.val_inds):
             yield train_inds, val_inds 
