@@ -1,11 +1,22 @@
 import torch
 import torch.nn as nn
+import scipy
 
 
 def pearson(x, y):
     xc = x - x.mean()
     yc = y - y.mean()
     return torch.sum(xc * yc) / (torch.sqrt(torch.sum(xc ** 2)) * torch.sqrt(torch.sum(yc ** 2)))
+
+
+def lgb_pearson(x, y):
+    return scipy.stats.pearsonr(x, y)[0]
+
+
+def lgb_pearson_eval(preds, train_data):
+    targets = train_data.get_label()
+    score = pearson(preds, targets)
+    return 'pearson', score, True
 
 
 class CCCLoss(nn.Module):
