@@ -15,7 +15,7 @@ def lgb_pearson(x, y):
 
 def lgb_pearson_eval(preds, train_data):
     targets = train_data.get_label()
-    score = pearson(preds, targets)
+    score = lgb_pearson(preds, targets)
     return 'pearson', score, True
 
 
