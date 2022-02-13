@@ -4,7 +4,7 @@ import numpy as np
 from .metrics import lgb_pearson, lgb_pearson_eval
 
 
-def lgb_score(trial, params, train, features, target, splitter, train_final=False):
+def lgb_score(trial, params, train, features, target, splitter, train_final=False, callbacks=[]):
     scores = []
     preds = []
 
@@ -20,9 +20,7 @@ def lgb_score(trial, params, train, features, target, splitter, train_final=Fals
             lgb_train,
             valid_sets=[lgb_train, lgb_valid],
             feval=lgb_pearson_eval,
-            callbacks=[
-                lgb.early_stopping(100)
-            ]
+            callbacks=callbacks
         )
         # Prediction
         y_pred = model.predict(train[features].iloc[val_index], num_iteration=model.best_iteration)
