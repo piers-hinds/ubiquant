@@ -4,7 +4,7 @@ import numpy as np
 from .metrics import lgb_pearson, lgb_pearson_eval
 
 
-def lgb_score(trial, params, train, features, target, splitter, train_final=False, lgb_pearson_eval=None):
+def lgb_score(trial, params, train, features, target, splitter, train_final=False):
     scores = []
     preds = []
 
