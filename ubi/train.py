@@ -6,9 +6,9 @@ import pandas as pd
 from .data import get_ubiquant_dataloaders
 
 
-def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], lr=0.0006):
+def train_model(model, dl, loss_fn, epochs, vdl=None, metrics=[], opt_parms={'lr':0.001, 'weight_decay': 0.0001}):
     model.train()
-    opt = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=0.0001)
+    opt = torch.optim.Adam(model.parameters(), **opt_parms)
     #scheduler = ExponentialLR(opt, gamma=gamma)
     losses = []
     for epoch in range(epochs):
